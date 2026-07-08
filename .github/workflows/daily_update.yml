@@ -2,19 +2,19 @@ name: Daily US Stock Quant Update & Verify
 
 on:
   schedule:
-    - cron: '0 22 * * 1-5'  # 每週一至週五 UTC 時間 22:00（美股收盤後兩小時）自動觸發
-  workflow_dispatch:        # 允許您在網頁隨時手動點擊執行測試
+    - cron: '0 22 * * 1-5'
+  workflow_dispatch:
 
 jobs:
   build-and-run:
     runs-on: ubuntu-latest
-
+    
     steps:
       - name: 檢出程式碼
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4  # 升級至 v4
 
       - name: 設定 Python 環境
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5  # 升級至 v5
         with:
           python-version: '3.10'
 
