@@ -1,27 +1,38 @@
-name: Daily US Stock Quant Update & Verify
+name: Daily Stock Data Update
 
 on:
   schedule:
-    - cron: '0 22 * * 1-5'
-  workflow_dispatch:
+    # 設定定時執行：台灣時間每天早上 07:00 (UTC 23:00，依夏令/冬令調整)
+    - cron: '0 23 * * 1-5'
+  workflow_dispatch: # 允許在 GitHub 網頁手動點擊 "Run workflow" 觸發
 
 jobs:
-  build-and-run:
+  update-data:
     runs-on: ubuntu-latest
-    
     steps:
-      - name: 檢出程式碼
-        uses: actions/checkout@v4  # 升級至 v4，完美支援 Node.js 最新標準
+      - name: Checkout Repository
+        uses: actions/checkout@v4
 
-      - name: 設定 Python 環境
-        uses: actions/setup-python@v5  # 升級至 v5
+      - name: Set up Python
+        uses: actions/setup-python@v5
         with:
           python-version: '3.10'
+          cache: 'pip'
 
-      - name: 安裝相依套件
+      - name: Install Dependencies
         run: |
           pip install --upgrade pip
-          pip install pandas yfinance
+          pip install pandas yfinance requests
 
-      - name: 執行每日一鍵更新與聚合程序
-        run: python tools/run_daily_routine.py
+      - name: Run Batch Update Script
+        env:
+          # 若有需要 API Key 可在此帶入 GitHub Secrets
+          API_KEY: ${{ secrets.API_KEY }}
+        run: |
+          python3 tools/batch_update.py
+
+      - name: Commit and Push Changes
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: 'chore: automated daily stock data update by GitHub Actions'
+          branch: main
